@@ -1,4 +1,4 @@
-import logo from "@/images/gphc-logo.png";
+import logo from "@/images/gphc-logo-2.png";
 import Image from "next/image";
 
 export function Logomark(props: React.ComponentPropsWithoutRef<'svg'>) {
