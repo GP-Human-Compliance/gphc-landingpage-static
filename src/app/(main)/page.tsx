@@ -11,11 +11,17 @@ export default function Home() {
   return (
     <>
       <div className="overflow-hidden py-20 sm:py-32 lg:pb-32 xl:pb-36">
-        <Container className='max-w-[50rem]'>
-          <h2 className="text-3xl font-semibold tracking-tight text-gray-900">Dem Menschen verpflichtet.</h2>
+        <Container className='max-w-[60rem] text-center'>
+          <h2 className="mt-10 text-pretty text-5xl font-semibold tracking-tight text-gray-900 sm:text-6xl">
+            Dem Menschen verpflichtet.
+          </h2>
+          <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8">
+          Unser Ziel ist, dass die Gesellschaft als Ganzes und jeder Einzelne für sich und mit Anderen die Risiken einer globalisierten Welt erkennt und informiert, selbstbestimmt und verantwortlich damit umgehen kann.
+          </p>
+          {/* <h2 className="text-3xl font-semibold tracking-tight text-gray-900">Dem Menschen verpflichtet.</h2>
           <p className="mt-2 text-lg text-gray-600">
             Unser Ziel ist, dass die Gesellschaft als Ganzes und jeder Einzelne für sich und mit Anderen die Risiken einer globalisierten Welt erkennt und informiert, selbstbestimmt und verantwortlich damit umgehen kann.
-          </p>
+          </p> */}
         </Container>
         <div
           aria-hidden="true"
