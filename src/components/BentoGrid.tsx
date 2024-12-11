@@ -14,7 +14,7 @@ export function BentoGrid() {
               impedit.
             </p>
           </div>
-          <div className="relative min-h-[30rem] w-full grow [container-type:inline-size] max-lg:mx-auto max-lg:max-w-sm">
+          <div className="relative w-full grow [container-type:inline-size] max-lg:mx-auto max-lg:max-w-sm">
             <span className="text-6xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
               🤝
             </span>
@@ -23,7 +23,7 @@ export function BentoGrid() {
         <div className="pointer-events-none absolute inset-px rounded-lg shadow ring-1 ring-black/5 lg:rounded-l-[2rem]">
         </div>
       </div>
-      <div className="relative max-lg:row-start-1">
+      <div className="relative">
         <div className="absolute inset-px rounded-lg bg-white max-lg:rounded-t-[2rem]">
         </div>
         <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] max-lg:rounded-t-[calc(2rem+1px)]">
