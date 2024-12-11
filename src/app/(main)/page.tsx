@@ -17,8 +17,8 @@ export default function Home() {
             Dem Menschen verpflichtet.
           </h2>
           <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8 max-w-[35rem] mx-auto text-center">
-            Unser Ziel ist, die Gesellschaft als Ganzes und jeden Einzelnen zur
-            Selbstbestimmung zu befähigen.
+          Unser Ziel ist es, für jeden Einzelnen und die Gesellschaft als Ganzes 
+          mit Selbstbestimmung zu beginnen.
             <br />
             <br /> Dafür bauen wir Software.
           </p>
