@@ -1,3 +1,4 @@
+import { BentoGrid } from '@/components/BentoGrid'
 import { CallToAction } from '@/components/CallToAction'
 import { Container } from '@/components/Container'
 import { Faqs } from '@/components/Faqs'
@@ -19,6 +20,7 @@ export default function Home() {
             Unser Ziel ist, die Gesellschaft als Ganzes und jeden Einzelnen zur Selbstbestimmung zu befähigen. 
             <br/><br/> Dafür bauen wir Software.
           </p>
+          <BentoGrid />
           {/* <h3 className="mt-16 text-pretty text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
             Unsere Tätigkeitsfelder
           </h3>
