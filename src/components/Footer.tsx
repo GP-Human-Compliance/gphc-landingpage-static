@@ -24,10 +24,11 @@ export function Footer() {
   return (
     <footer>
       <Container>
-        <div className="flex flex-col items-start pb-12 pt-8 md:pt-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-start pb-12 pt-8 md:pt-6 px-4 sm:px-6 lg:px-8 justify-between">
           <p className="mt-6 text-sm text-gray-500 md:mt-0">
-            &copy; Copyright {new Date().getFullYear()}. All rights reserved.
+            &copy; {new Date().getFullYear()}. All rights reserved.
           </p>
+          <a href="mailto:info@gp-hc.de" className="text-gray-500 text-sm">Kontakt</a>
         </div>
       </Container>
     </footer>
