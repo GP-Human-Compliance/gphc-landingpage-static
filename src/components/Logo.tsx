@@ -1,4 +1,5 @@
 import logo from "@/images/gphc-logo-2.png";
+import clsx from "clsx";
 import Image from "next/image";
 
 export function Logomark(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -13,8 +14,9 @@ export function Logomark(props: React.ComponentPropsWithoutRef<'svg'>) {
   )
 }
 
-export function Logo(props: Omit<React.ComponentPropsWithoutRef<typeof Image>, 'src'>) {
+export function Logo({className, ...props}: Omit<React.ComponentPropsWithoutRef<typeof Image>, 'src'>) {
   return (
-    <Image {...props} src={logo} alt="GP-HC" draggable={false} />
+    <Image className={clsx("w-full object-contain ", className)} {...props} src={logo} alt="GP-HC" draggable={false} />
   )
 }
+
