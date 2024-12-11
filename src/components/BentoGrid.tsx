@@ -7,9 +7,9 @@ interface BentoCardProps {
 
 function BentoCard({ title, description, media, position }: BentoCardProps) {
   const roundedClasses = {
-    left: 'max-lg:rounded-t-[2rem] lg:rounded-l-[2rem]',
+    left: 'max-lg:rounded-t-[1.5rem] lg:rounded-l-[1.5rem]',
     middle: ']',
-    right: 'max-lg:rounded-b-[2rem] lg:rounded-r-[2rem]',
+    right: 'max-lg:rounded-b-[1.5rem] lg:rounded-r-[1.5rem]',
   }[position];
 
   return (

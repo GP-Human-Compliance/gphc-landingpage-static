@@ -13,10 +13,10 @@ export default function Home() {
     <>
       <div className="overflow-hidden py-20 sm:py-32 lg:pb-32 xl:pb-36">
         <Container className="max-w-[60rem] text-center mx-auto">
-          <h2 className="mt-10 text-pretty text-5xl font-semibold tracking-tight text-gray-900 sm:text-6xl">
+          <h2 className="mt-10 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
             Dem Menschen verpflichtet.
           </h2>
-          <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8 max-w-[35rem] mx-auto text-center">
+          <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8 max-w-[35rem] mx-auto text-center">
             Unser Ziel ist, die Gesellschaft als Ganzes und jeden Einzelnen zur
             Selbstbestimmung zu befähigen.
             <br />
