@@ -10,13 +10,39 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
+const title = 'Dem Menschen verpflichtet.'
+const description = 'Unser Ziel ist, die Gesellschaft als Ganzes und jeden Einzelnen zur Selbstbestimmung zu befähigen. Dafür bauen wir Software.'
+const url = 'https://gp-hc.de'
+
 export const metadata: Metadata = {
   title: {
-    template: '%s - Pocket',
-    default: 'Pocket - Invest at the perfect time.',
+    template: '%s - ' + title,
+    default: title,
   },
   description:
-    'By leveraging insights from our network of industry insiders, you’ll know exactly when to buy to maximize profit, and exactly when to sell to avoid painful losses.',
+    description,
+  openGraph: {
+    title: title,
+    description: description,
+    url: url, 
+    siteName: 'GP-HC',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: title,
+      },
+    ],
+    locale: 'de_DE',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: title,
+    description: description,
+    images: ['/og-image.png'],
+  },
   icons: {
     // Standard favicon
     icon: [
