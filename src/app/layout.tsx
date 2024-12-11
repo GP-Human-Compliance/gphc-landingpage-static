@@ -11,7 +11,7 @@ const inter = Inter({
 })
 
 const title = 'Dem Menschen verpflichtet.'
-const description = 'Unser Ziel ist, die Gesellschaft als Ganzes und jeden Einzelnen zur Selbstbestimmung zu befähigen. Dafür bauen wir Software.'
+const description = 'Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur Selbstbestimmung zu befähigen. Dafür bauen wir Software.'
 const url = 'https://gp-hc.de'
 
 export const metadata: Metadata = {
