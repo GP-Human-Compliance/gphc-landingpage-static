@@ -15,17 +15,17 @@ function BentoCard({ title, description, media, position }: BentoCardProps) {
   return (
     <div className="relative">
       <div className={`absolute inset-px rounded-lg bg-white ${roundedClasses}`} />
-      <div className={`relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] ${roundedClasses.replace(/\[2rem\]/g, '[calc(2rem+1px)]')}`}>
-        <div className="px-8 pb-3 pt-8 sm:px-10 sm:pb-0 sm:pt-10 mx-auto">
+      <div className={`relative flex h-full pb-10 pt-5 flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] ${roundedClasses.replace(/\[2rem\]/g, '[calc(2rem+1px)]')}`}>
+        <div className="flex flex-1 items-center [container-type:inline-size]">
+          {media}
+        </div>
+        <div className="px-8 sm:px-10mx-auto">
           <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center">
             {title}
           </p>
           <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
             {description}
           </p>
-        </div>
-        <div className="flex flex-1 items-center [container-type:inline-size] max-lg:py-6 lg:pb-2">
-          {media}
         </div>
       </div>
       <div className={`pointer-events-none absolute inset-px rounded-lg shadow ring-1 ring-black/5 ${roundedClasses}`} />
@@ -51,11 +51,16 @@ export function BentoGrid() {
         title="Performant"
         description="Lorem ipsum, dolor sit amet consectetur adipisicing elit maiores impedit."
         media={
-          <img
-            className="w-full max-lg:max-w-xs p-8 mx-auto"
-            src="https://tailwindui.com/plus/img/component-images/bento-03-performance.png"
-            alt=""
-          />
+          <>
+            <div className="h-[min(152px,40cqw)] text-5xl w-full items-center justify-center flex">
+              🚀
+            </div>
+            {/* <img
+              className="w-full max-lg:max-w-xs p-8 mx-auto"
+              src="https://tailwindui.com/plus/img/component-images/bento-03-performance.png"
+              alt=""
+            /> */}
+          </>
         }
       />
       <BentoCard
@@ -63,11 +68,16 @@ export function BentoGrid() {
         title="Sicher"
         description="Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget sem sodales gravida."
         media={
-          <img
-            className="h-[min(152px,40cqw)] object-cover p-4 mx-auto"
+          <>
+            <div className="h-[min(152px,40cqw)] text-5xl w-full items-center justify-center flex">
+              🔒
+            </div>
+            {/* <img
+              className="h-[min(152px,40cqw)] object-cover p-4 mx-auto"
             src="https://tailwindui.com/plus/img/component-images/bento-03-security.png"
-            alt=""
-          />
+              alt=""
+            /> */}
+          </>
         }
       />
     </div>
