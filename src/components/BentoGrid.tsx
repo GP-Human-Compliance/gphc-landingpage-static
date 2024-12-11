@@ -13,7 +13,7 @@ function BentoCard({ title, description, media, position }: BentoCardProps) {
   }[position];
 
   return (
-    <div className="relative">
+    <div className="relative max-w-sm mx-auto">
       <div className={`absolute inset-px rounded-lg bg-white ${roundedClasses}`} />
       <div className={`relative flex h-full pb-10 pt-5 flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] ${roundedClasses.replace(/\[2rem\]/g, '[calc(2rem+1px)]')}`}>
         <div className="flex flex-1 items-center [container-type:inline-size]">
