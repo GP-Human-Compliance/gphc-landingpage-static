@@ -17,10 +17,10 @@ export default function Home() {
             Dem Menschen verpflichtet.
           </h2>
           <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8 max-w-[35rem] mx-auto text-center">
-            Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur Selbstbestimmung zu befähigen.
+            Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur Selbstbestimmung zu ermutigen.
             <br /><br /> Dafür bauen wir Software.
           </p>
-          <BentoGrid />
+          {/* <BentoGrid /> */}
           {
             /* <h3 className="mt-16 text-pretty text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
             Unsere Tätigkeitsfelder
