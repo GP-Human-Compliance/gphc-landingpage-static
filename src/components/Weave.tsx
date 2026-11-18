@@ -102,9 +102,10 @@ const weft = bands(false) // second set: vertical in the rotated frame
 /*
  * At the top and bottom tip two bands both stop inside the same crossing,
  * slightly offset, which leaves thin slivers between near-parallel lines.
- * Square both ends off at the crossing's outer corner so they meet flush.
+ * Instead the weft runs right through to the tip and the warp stops flush
+ * against the weft's side.
  */
-type Joint = { w: Band; v: Band; warpEnd: 'from' | 'to'; weftEnd: 'from' | 'to' }
+type Joint = { w: Band; v: Band; warpEnd: 'from' | 'to' }
 
 function squareOffTips() {
   const half = BAND / 2
@@ -115,15 +116,29 @@ function squareOffTips() {
       const warpEnd = inside(w.from, v.offset) ? 'from' : inside(w.to, v.offset) ? 'to' : null
       const weftEnd = inside(v.from, w.offset) ? 'from' : inside(v.to, w.offset) ? 'to' : null
       if (!warpEnd || !weftEnd) continue
-      w[warpEnd] = v.offset + (warpEnd === 'from' ? -half : half)
       v[weftEnd] = w.offset + (weftEnd === 'from' ? -half : half)
-      result.push({ w, v, warpEnd, weftEnd })
+      w[warpEnd] = v.offset + (warpEnd === 'from' ? half : -half)
+      result.push({ w, v, warpEnd })
     }
   }
   return result
 }
 
 const joints = squareOffTips()
+const isJoint = (w: Band, v: Band) => joints.some((joint) => joint.w === w && joint.v === v)
+
+/*
+ * The weft normally leaves a small gap in the lines of a band passing under
+ * it. At a tip the warp ends right at the weft, so close that gap again.
+ */
+function jointPath({ w, warpEnd }: Joint) {
+  const half = BAND / 2
+  const end = w[warpEnd]
+  const reach = (warpEnd === 'from' ? 1 : -1) * (GAP + 0.6)
+  return [w.offset - half, w.offset + half]
+    .map((y) => `M${fmt(end)} ${fmt(y)}H${fmt(end + reach)}`)
+    .join('')
+}
 
 /*
  * Line up the outermost band ends at the top and at the bottom exactly with
@@ -144,32 +159,6 @@ function levelTips() {
 }
 
 levelTips()
-const isJoint = (w: Band, v: Band) => joints.some((joint) => joint.w === w && joint.v === v)
-
-/*
- * Draw a joint as one clean corner: hide the weft's inner edge inside the
- * shared square and close the gap the weft normally leaves in the warp lines.
- */
-function jointPath(joint: Joint) {
-  const half = BAND / 2
-  const sx = joint.warpEnd === 'from' ? 1 : -1 // direction the warp continues in
-  const sy = joint.weftEnd === 'from' ? 1 : -1 // direction the weft continues in
-  const cx = joint.v.offset - sx * half // outer corner
-  const cy = joint.w.offset - sy * half
-  const inset = 0.6
-  const reach = BAND + GAP + inset
-  const xs = [cx + sx * inset, cx + sx * reach]
-  const ys = [cy + sy * inset, cy + sy * (BAND - inset)]
-  return {
-    cover: {
-      x: fmt(Math.min(...xs)),
-      y: fmt(Math.min(...ys)),
-      width: fmt(Math.abs(xs[1] - xs[0])),
-      height: fmt(Math.abs(ys[1] - ys[0])),
-    },
-    lines: `M${fmt(cx)} ${fmt(cy)}H${fmt(cx + sx * reach)}M${fmt(cx + sx * BAND)} ${fmt(cy + sy * BAND)}H${fmt(cx + sx * reach)}`,
-  }
-}
 
 function outline(x: number, y: number, width: number, height: number) {
   return `M${fmt(x)} ${fmt(y)}h${fmt(width)}v${fmt(height)}h${fmt(-width)}Z`
@@ -275,16 +264,10 @@ export function Weave({ className }: { className?: string }) {
             )
           })}
 
-        {/* Tips: the two bands meeting there close flush in one corner */}
-        {joints.map((joint, k) => {
-          const { cover, lines } = jointPath(joint)
-          return (
-            <g key={`joint-${k}`} className="weave-fade" style={delay(1700)}>
-              <rect {...cover} className="fill-paper stroke-none" />
-              <path d={lines} />
-            </g>
-          )
-        })}
+        {/* Tips: the warp stops flush against the weft */}
+        {joints.map((joint, k) => (
+          <path key={`joint-${k}`} d={jointPath(joint)} className="weave-fade" style={delay(1700)} />
+        ))}
       </g>
     </svg>
   )
