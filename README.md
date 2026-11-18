@@ -1,6 +1,6 @@
 # gp-hc.de
 
-Website of GP Human Compliance GmbH, served at [www.gp-hc.de](https://www.gp-hc.de).
+Website of GP Human Compliance GmbH, served at [gp-hc.de](https://gp-hc.de).
 
 Built with [Next.js](https://nextjs.org) and [Tailwind CSS](https://tailwindcss.com) as a static export and deployed to GitHub Pages.
 
@@ -14,7 +14,7 @@ npm run typecheck
 
 ## Deployment
 
-Every push to `main` runs `.github/workflows/pages.yml`: `npm run build` writes the static site to `out/`, which is published to GitHub Pages. The custom domain `www.gp-hc.de` is configured in the repository's Pages settings (`public/CNAME` mirrors it).
+Every push to `main` runs `.github/workflows/pages.yml`: `npm run build` writes the static site to `out/`, which is published to GitHub Pages. The custom domain `gp-hc.de` (www redirects to it) is configured in the repository's Pages settings (`public/CNAME` mirrors it).
 
 ## Content
 
