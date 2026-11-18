@@ -15,6 +15,7 @@ const description = 'Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ga
 const url = 'https://gp-hc.de'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.gp-hc.de'),
   title: {
     template: '%s - ' + title,
     default: title,
