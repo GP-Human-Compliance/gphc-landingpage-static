@@ -96,105 +96,80 @@ function bands(horizontal: boolean) {
   return result
 }
 
+const warp = bands(true) // first set: horizontal in the rotated frame
+const weft = bands(false) // second set: vertical in the rotated frame
+
 /*
- * A band that stops inside another band, or just past it, would leave a stub
- * poking out. Pull such ends back so they stop in the gap before that band.
+ * At the top and bottom tip two bands both stop inside the same crossing,
+ * slightly offset, which leaves thin slivers between near-parallel lines.
+ * Square both ends off at the crossing's outer corner so they meet flush.
  */
-const CLEARANCE = 2
+type Joint = { w: Band; v: Band; warpEnd: 'from' | 'to'; weftEnd: 'from' | 'to' }
 
-function clearEnds(own: Band[], others: Band[]) {
-  let changed = false
-  for (const band of own) {
-    for (const other of others) {
-      // Only bands that actually reach across this one matter
-      if (other.from > band.offset + BAND / 2 || other.to < band.offset - BAND / 2) continue
-      const before = other.offset - BAND / 2 - GAP - CLEARANCE
-      const after = other.offset + BAND / 2 + GAP + CLEARANCE
-      if (band.to > before && band.to < after) {
-        band.to = before
-        changed = true
-      }
-      if (band.from > before && band.from < after) {
-        band.from = after
-        changed = true
-      }
-    }
-  }
-  return changed
-}
-
-const keep = (band: Band) => band.to - band.from >= MIN_LENGTH
-
-let warp = bands(true) // first set: horizontal in the rotated frame
-let weft = bands(false) // second set: vertical in the rotated frame
-for (let changed = true; changed; ) {
-  changed = clearEnds(warp, weft)
-  changed = clearEnds(weft, warp) || changed
-  warp = warp.filter(keep)
-  weft = weft.filter(keep)
-}
-
-// Over and under alternate like a chequerboard
-function chequer(warpOffset: number, weftOffset: number) {
-  const n = Math.round((warpOffset + weftOffset) / PITCH)
-  return ((n % 2) + 2) % 2 === 0
-}
-
-// Does the weft band cross the whole width of the warp band, and vice versa?
-function crossesFully(w: Band, v: Band) {
+function squareOffTips() {
   const half = BAND / 2
-  return (
-    v.offset - half >= w.from &&
-    v.offset + half <= w.to &&
-    w.offset - half >= v.from &&
-    w.offset + half <= v.to
-  )
-}
-
-/*
- * If a band lies underneath at its outermost crossing, the bit beyond would
- * show as a detached piece. Instead the band runs under that crossing band
- * and ends there, hidden, like a tucked-in thread.
- */
-function tuckEnds() {
-  const tucks: [Band, 'from' | 'to', number][] = []
-  for (const [own, others, isWarp] of [
-    [warp, weft, true],
-    [weft, warp, false],
-  ] as const) {
-    for (const band of own) {
-      const along = others
-        .filter((other) => (isWarp ? crossesFully(band, other) : crossesFully(other, band)))
-        .map((other) => other.offset)
-      if (along.length === 0) continue
-      const onTop = (at: number) => (isWarp ? chequer(band.offset, at) : !chequer(at, band.offset))
-      const first = Math.min(...along)
-      const last = Math.max(...along)
-      if (!onTop(last)) tucks.push([band, 'to', last])
-      if (!onTop(first)) tucks.push([band, 'from', first])
+  const inside = (end: number, centre: number) => Math.abs(end - centre) < half
+  const result: Joint[] = []
+  for (const w of warp) {
+    for (const v of weft) {
+      const warpEnd = inside(w.from, v.offset) ? 'from' : inside(w.to, v.offset) ? 'to' : null
+      const weftEnd = inside(v.from, w.offset) ? 'from' : inside(v.to, w.offset) ? 'to' : null
+      if (!warpEnd || !weftEnd) continue
+      w[warpEnd] = v.offset + (warpEnd === 'from' ? -half : half)
+      v[weftEnd] = w.offset + (weftEnd === 'from' ? -half : half)
+      result.push({ w, v, warpEnd, weftEnd })
     }
   }
-  for (const [band, end, at] of tucks) band[end] = at
+  return result
 }
 
-tuckEnds()
+const joints = squareOffTips()
 
-const same = (a: number, b: number) => Math.abs(a - b) < 1e-6
-const reaches = (band: Band, at: number) => at >= band.from - 1e-6 && at <= band.to + 1e-6
+/*
+ * Line up the outermost band ends at the top and at the bottom exactly with
+ * the tips, so they all end at the same height.
+ */
+function levelTips() {
+  const half = BAND / 2
+  const tolerance = 3
+  const all = [...warp, ...weft]
+  const top = (band: Band) => (band.from + band.offset - half) / Math.SQRT2
+  const bottom = (band: Band) => (band.to + band.offset + half) / Math.SQRT2
+  const highest = Math.min(...all.map(top))
+  const lowest = Math.max(...all.map(bottom))
+  for (const band of all) {
+    if (top(band) - highest < tolerance) band.from = highest * Math.SQRT2 - band.offset + half
+    if (lowest - bottom(band) < tolerance) band.to = lowest * Math.SQRT2 - band.offset - half
+  }
+}
 
-// Every place where two bands meet, and which one lies on top there
-const crossings = warp.flatMap((w, i) =>
-  weft
-    .map((v, j) => ({ w, v, i, j }))
-    .filter(({ w, v }) => reaches(w, v.offset) && reaches(v, w.offset))
-    .map((crossing) => {
-      const { w, v } = crossing
-      const warpTucked = same(w.from, v.offset) || same(w.to, v.offset)
-      const weftTucked = same(v.from, w.offset) || same(v.to, w.offset)
-      const warpOver = warpTucked ? false : weftTucked || chequer(w.offset, v.offset)
-      return { ...crossing, warpOver }
-    }),
-)
+levelTips()
+const isJoint = (w: Band, v: Band) => joints.some((joint) => joint.w === w && joint.v === v)
+
+/*
+ * Draw a joint as one clean corner: hide the weft's inner edge inside the
+ * shared square and close the gap the weft normally leaves in the warp lines.
+ */
+function jointPath(joint: Joint) {
+  const half = BAND / 2
+  const sx = joint.warpEnd === 'from' ? 1 : -1 // direction the warp continues in
+  const sy = joint.weftEnd === 'from' ? 1 : -1 // direction the weft continues in
+  const cx = joint.v.offset - sx * half // outer corner
+  const cy = joint.w.offset - sy * half
+  const inset = 0.6
+  const reach = BAND + GAP + inset
+  const xs = [cx + sx * inset, cx + sx * reach]
+  const ys = [cy + sy * inset, cy + sy * (BAND - inset)]
+  return {
+    cover: {
+      x: fmt(Math.min(...xs)),
+      y: fmt(Math.min(...ys)),
+      width: fmt(Math.abs(xs[1] - xs[0])),
+      height: fmt(Math.abs(ys[1] - ys[0])),
+    },
+    lines: `M${fmt(cx)} ${fmt(cy)}H${fmt(cx + sx * reach)}M${fmt(cx + sx * BAND)} ${fmt(cy + sy * BAND)}H${fmt(cx + sx * reach)}`,
+  }
+}
 
 function outline(x: number, y: number, width: number, height: number) {
   return `M${fmt(x)} ${fmt(y)}h${fmt(width)}v${fmt(height)}h${fmt(-width)}Z`
@@ -206,6 +181,18 @@ function delay(ms: number) {
 
 export function Weave({ className }: { className?: string }) {
   const half = BAND / 2
+  const crossings = warp.flatMap((w, i) =>
+    weft
+      .map((v, j) => ({ w, v, i, j }))
+      .filter(
+        ({ w, v }) =>
+          v.offset - half >= w.from &&
+          v.offset + half <= w.to &&
+          w.offset - half >= v.from &&
+          w.offset + half <= v.to &&
+          !isJoint(w, v),
+      ),
+  )
 
   return (
     <svg
@@ -264,7 +251,7 @@ export function Weave({ className }: { className?: string }) {
 
         {/* Interlace: every other crossing lifts the warp back on top */}
         {crossings
-          .filter(({ warpOver }) => warpOver)
+          .filter(({ i, j }) => (i + j) % 2 === 0)
           .map(({ w, v, i, j }) => {
             const x = v.offset - half - GAP
             const length = BAND + 2 * GAP
@@ -287,6 +274,17 @@ export function Weave({ className }: { className?: string }) {
               </g>
             )
           })}
+
+        {/* Tips: the two bands meeting there close flush in one corner */}
+        {joints.map((joint, k) => {
+          const { cover, lines } = jointPath(joint)
+          return (
+            <g key={`joint-${k}`} className="weave-fade" style={delay(1700)}>
+              <rect {...cover} className="fill-paper stroke-none" />
+              <path d={lines} />
+            </g>
+          )
+        })}
       </g>
     </svg>
   )
