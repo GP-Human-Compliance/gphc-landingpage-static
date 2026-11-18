@@ -13,7 +13,7 @@ const FIELD_RADIUS = 76 // bands are kept inside this hexagon
 const BAND = 10 // band width
 const PITCH = 20 // distance between band centres
 const GAP = 1.8 // breathing room where one band passes under another
-const MIN_LENGTH = BAND * 1.6
+const MIN_LENGTH = PITCH * 2 // leave out the short bars at the edges
 
 type Point = [number, number]
 type Band = { offset: number; from: number; to: number }
@@ -96,8 +96,49 @@ function bands(horizontal: boolean) {
   return result
 }
 
-const warp = bands(true) // first set: horizontal in the rotated frame
-const weft = bands(false) // second set: vertical in the rotated frame
+/*
+ * A band that stops inside another band, or just past it, would leave a stub
+ * poking out. Pull such ends back so they stop in the gap before that band.
+ */
+const CLEARANCE = 2
+
+function clearEnds(own: Band[], others: Band[]) {
+  let changed = false
+  for (const band of own) {
+    for (const other of others) {
+      // Only bands that actually reach across this one matter
+      if (other.from > band.offset + BAND / 2 || other.to < band.offset - BAND / 2) continue
+      const before = other.offset - BAND / 2 - GAP - CLEARANCE
+      const after = other.offset + BAND / 2 + GAP + CLEARANCE
+      if (band.to > before && band.to < after) {
+        band.to = before
+        changed = true
+      }
+      if (band.from > before && band.from < after) {
+        band.from = after
+        changed = true
+      }
+    }
+  }
+  return changed
+}
+
+const keep = (band: Band) => band.to - band.from >= MIN_LENGTH
+
+let warp = bands(true) // first set: horizontal in the rotated frame
+let weft = bands(false) // second set: vertical in the rotated frame
+for (let changed = true; changed; ) {
+  changed = clearEnds(warp, weft)
+  changed = clearEnds(weft, warp) || changed
+  warp = warp.filter(keep)
+  weft = weft.filter(keep)
+}
+
+// Over and under alternate like a chequerboard
+function warpOver(w: Band, v: Band) {
+  const n = Math.round((w.offset + v.offset) / PITCH)
+  return ((n % 2) + 2) % 2 === 0
+}
 
 function outline(x: number, y: number, width: number, height: number) {
   return `M${fmt(x)} ${fmt(y)}h${fmt(width)}v${fmt(height)}h${fmt(-width)}Z`
@@ -178,7 +219,7 @@ export function Weave({ className }: { className?: string }) {
 
         {/* Interlace: every other crossing lifts the warp back on top */}
         {crossings
-          .filter(({ i, j }) => (i + j) % 2 === 0)
+          .filter(({ w, v }) => warpOver(w, v))
           .map(({ w, v, i, j }) => {
             const x = v.offset - half - GAP
             const length = BAND + 2 * GAP
