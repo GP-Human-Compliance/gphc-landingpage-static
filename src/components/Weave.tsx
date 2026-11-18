@@ -102,43 +102,34 @@ const weft = bands(false) // second set: vertical in the rotated frame
 /*
  * At the top and bottom tip two bands both stop inside the same crossing,
  * slightly offset, which leaves thin slivers between near-parallel lines.
- * Instead the weft runs right through to the tip and the warp stops flush
- * against the weft's side.
+ * Instead they cross properly there and run on a little past each other,
+ * about as far as the bands at the left and right tip do. The weft lies on
+ * top at these two crossings.
  */
-type Joint = { w: Band; v: Band; warpEnd: 'from' | 'to' }
+const TIP_OVERHANG = 6
 
-function squareOffTips() {
+type Tip = { w: Band; v: Band }
+
+function crossAtTips() {
   const half = BAND / 2
   const inside = (end: number, centre: number) => Math.abs(end - centre) < half
-  const result: Joint[] = []
+  const result: Tip[] = []
   for (const w of warp) {
     for (const v of weft) {
       const warpEnd = inside(w.from, v.offset) ? 'from' : inside(w.to, v.offset) ? 'to' : null
       const weftEnd = inside(v.from, w.offset) ? 'from' : inside(v.to, w.offset) ? 'to' : null
       if (!warpEnd || !weftEnd) continue
-      v[weftEnd] = w.offset + (weftEnd === 'from' ? -half : half)
-      w[warpEnd] = v.offset + (warpEnd === 'from' ? half : -half)
-      result.push({ w, v, warpEnd })
+      const past = half + TIP_OVERHANG
+      w[warpEnd] = v.offset + (warpEnd === 'from' ? -past : past)
+      v[weftEnd] = w.offset + (weftEnd === 'from' ? -past : past)
+      result.push({ w, v })
     }
   }
   return result
 }
 
-const joints = squareOffTips()
-const isJoint = (w: Band, v: Band) => joints.some((joint) => joint.w === w && joint.v === v)
-
-/*
- * The weft normally leaves a small gap in the lines of a band passing under
- * it. At a tip the warp ends right at the weft, so close that gap again.
- */
-function jointPath({ w, warpEnd }: Joint) {
-  const half = BAND / 2
-  const end = w[warpEnd]
-  const reach = (warpEnd === 'from' ? 1 : -1) * (GAP + 0.6)
-  return [w.offset - half, w.offset + half]
-    .map((y) => `M${fmt(end)} ${fmt(y)}H${fmt(end + reach)}`)
-    .join('')
-}
+const tips = crossAtTips()
+const weftOnTop = (w: Band, v: Band) => tips.some((tip) => tip.w === w && tip.v === v)
 
 /*
  * Line up the outermost band ends at the top and at the bottom exactly with
@@ -146,7 +137,7 @@ function jointPath({ w, warpEnd }: Joint) {
  */
 function levelTips() {
   const half = BAND / 2
-  const tolerance = 3
+  const tolerance = 8
   const all = [...warp, ...weft]
   const top = (band: Band) => (band.from + band.offset - half) / Math.SQRT2
   const bottom = (band: Band) => (band.to + band.offset + half) / Math.SQRT2
@@ -179,7 +170,7 @@ export function Weave({ className }: { className?: string }) {
           v.offset + half <= w.to &&
           w.offset - half >= v.from &&
           w.offset + half <= v.to &&
-          !isJoint(w, v),
+          !weftOnTop(w, v),
       ),
   )
 
@@ -264,10 +255,6 @@ export function Weave({ className }: { className?: string }) {
             )
           })}
 
-        {/* Tips: the warp stops flush against the weft */}
-        {joints.map((joint, k) => (
-          <path key={`joint-${k}`} d={jointPath(joint)} className="weave-fade" style={delay(1700)} />
-        ))}
       </g>
     </svg>
   )
