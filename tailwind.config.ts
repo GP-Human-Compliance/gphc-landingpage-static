@@ -36,9 +36,19 @@ export default {
       },
       colors: ({ colors }) => ({
         gray: colors.neutral,
+        // Derived from the logo teal (#00909B)
+        paper: "#F7FAFA",
+        ink: "#0F2B2E",
+        muted: "#4B6466",
+        teal: {
+          DEFAULT: "#00909B",
+          deep: "#00727A",
+          pale: "#CFE8EA",
+        },
+        rule: "#D5E3E4",
       }),
       fontFamily: {
-        sans: "var(--font-inter)",
+        sans: ["var(--font-open-sans)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "fade-in": {
