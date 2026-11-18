@@ -1,18 +1,21 @@
 import { type Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Open_Sans } from 'next/font/google'
 import clsx from 'clsx'
 
 import '@/styles/tailwind.css'
 
-const inter = Inter({
+// Self-hosted at build time by next/font: no requests to Google at runtime.
+// The wdth axis provides the condensed cut used for headlines.
+const openSans = Open_Sans({
   subsets: ['latin'],
+  axes: ['wdth'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-open-sans',
 })
 
 const title = 'Dem Menschen verpflichtet.'
 const description = 'Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur Selbstbestimmung zu befähigen. Dafür bauen wir Software.'
-const url = 'https://gp-hc.de'
+const url = 'https://www.gp-hc.de'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gp-hc.de'),
@@ -70,8 +73,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={clsx('bg-gray-50 antialiased', inter.variable)}>
-      <body>{children}</body>
+    <html lang="de" className={clsx('bg-paper antialiased', openSans.variable)}>
+      <body className="font-sans">{children}</body>
     </html>
   )
 }

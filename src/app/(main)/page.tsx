@@ -1,55 +1,28 @@
-import { BentoGrid } from "@/components/BentoGrid";
-import { CallToAction } from "@/components/CallToAction";
-import { Container } from "@/components/Container";
-import { Faqs } from "@/components/Faqs";
-import { Hero } from "@/components/Hero";
-import { Pricing } from "@/components/Pricing";
-import { PrimaryFeatures } from "@/components/PrimaryFeatures";
-import { Reviews } from "@/components/Reviews";
-import { SecondaryFeatures } from "@/components/SecondaryFeatures";
+import { Container } from '@/components/Container'
+import { Weave } from '@/components/Weave'
 
 export default function Home() {
   return (
-    <>
-      <div className="overflow-hidden py-20 sm:py-32 lg:pb-32 xl:pb-36">
-        <Container className="max-w-[60rem] text-center mx-auto">
-          <h2 className="mt-10 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            Dem Menschen verpflichtet.
-          </h2>
-          <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-lg/8 max-w-[35rem] mx-auto text-center">
-            Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur Selbstbestimmung zu ermutigen.
-            <br /><br /> Dafür bauen wir Software.
-          </p>
-          {/* <BentoGrid /> */}
-          {
-            /* <h3 className="mt-16 text-pretty text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
-            Unsere Tätigkeitsfelder
-          </h3>
-          <ul className="mt-4 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8 list-disc list-inside">
-            <li>Medieninnovationen</li>
-            <li>Softwareentwicklung</li>
-          </ul> */
-          }
-          {
-            /* <h2 className="text-3xl font-semibold tracking-tight text-gray-900">Dem Menschen verpflichtet.</h2>
-          <p className="mt-2 text-lg text-gray-600">
-            Unser Ziel ist, dass die Gesellschaft als Ganzes und jeder Einzelne für sich und mit Anderen die Risiken einer globalisierten Welt erkennt und informiert, selbstbestimmt und verantwortlich damit umgehen kann.
-          </p> */
-          }
-        </Container>
+    <Container className="grid items-center gap-x-16 gap-y-14 py-12 sm:py-20 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:py-28">
+      <div>
+        <h1 className="display text-balance text-6xl leading-[0.95] text-ink sm:text-7xl lg:text-8xl">
+          Dem Menschen verpflichtet.
+        </h1>
+        <p className="mt-10 max-w-[32rem] text-pretty text-lg leading-8 text-muted sm:text-xl sm:leading-9">
+          Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur
+          Selbstbestimmung zu ermutigen.
+        </p>
+        <p className="mt-4 text-lg font-semibold leading-8 text-ink sm:text-xl sm:leading-9">
+          Dafür bauen wir Software.
+        </p>
+        <p className="mt-12 text-base text-muted">
+          Schreiben Sie uns an{' '}
+          <a href="mailto:info@gp-hc.de" className="link">
+            info@gp-hc.de
+          </a>
+        </p>
       </div>
-      <div
-        aria-hidden="true"
-        className="fixed inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
-      >
-        <div
-          style={{
-            clipPath:
-              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-          }}
-          className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-        />
-      </div>
-    </>
-  );
+      <Weave className="mx-auto w-full max-w-[18rem] sm:max-w-[24rem] lg:max-w-[30rem]" />
+    </Container>
+  )
 }

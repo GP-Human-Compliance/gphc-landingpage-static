@@ -1,35 +1,29 @@
-# Pocket
+# gp-hc.de
 
-Pocket is a [Tailwind UI](https://tailwindui.com) site template built using [Tailwind CSS](https://tailwindcss.com) and [Next.js](https://nextjs.org).
+Website of GP Human Compliance GmbH, served at [www.gp-hc.de](https://www.gp-hc.de).
 
-## Getting started
+Built with [Next.js](https://nextjs.org) and [Tailwind CSS](https://tailwindcss.com) as a static export and deployed to GitHub Pages.
 
-To get started with this template, first install the npm dependencies:
-
-```bash
-npm install
-```
-
-Next, run the development server:
+## Development
 
 ```bash
-npm run dev
+npm ci
+npm run dev        # http://localhost:3000
+npm run typecheck
 ```
 
-Finally, open [http://localhost:3000](http://localhost:3000) in your browser to view the website.
+## Deployment
 
-## Customizing
+Every push to `main` runs `.github/workflows/pages.yml`: `npm run build` writes the static site to `out/`, which is published to GitHub Pages. The custom domain `www.gp-hc.de` is configured in the repository's Pages settings (`public/CNAME` mirrors it).
 
-You can start editing this template by modifying the files in the `/src` folder. The site will auto-update as you edit these files.
+## Content
+
+- Landing page: `src/app/(main)/page.tsx`
+- Impressum: `src/app/(main)/legal/page.tsx`
+- Datenschutzerklärung: `src/app/(main)/privacy/page.tsx`
+
+Legal texts are based on e-recht24.de; changes should be reviewed by our data protection consultant.
 
 ## License
 
-This site template is a commercial product and is licensed under the [Tailwind UI license](https://tailwindui.com/license).
-
-## Learn more
-
-To learn more about the technologies used in this site template, see the following resources:
-
-- [Tailwind CSS](https://tailwindcss.com/docs) - the official Tailwind CSS documentation
-- [Next.js](https://nextjs.org/docs) - the official Next.js documentation
-- [Headless UI](https://headlessui.dev) - the official Headless UI documentation
+Parts of the layout are based on a [Tailwind UI](https://tailwindui.com) template, see `LICENSE.md`.
