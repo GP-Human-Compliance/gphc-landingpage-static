@@ -15,10 +15,10 @@ const openSans = Open_Sans({
 
 const title = 'Dem Menschen verpflichtet.'
 const description = 'Unser Ziel ist, jeden Einzelnen und die Gesellschaft als Ganzes zur Selbstbestimmung zu befähigen. Dafür bauen wir Software.'
-const url = 'https://www.gp-hc.de'
+const url = 'https://gp-hc.de'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.gp-hc.de'),
+  metadataBase: new URL('https://gp-hc.de'),
   title: {
     template: '%s - ' + title,
     default: title,
