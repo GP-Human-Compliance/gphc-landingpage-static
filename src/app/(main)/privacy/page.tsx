@@ -39,12 +39,17 @@ export default function Legal() {
 
               <p>Unser(e) Hoster wird bzw. werden Ihre Daten nur insoweit verarbeiten, wie dies zur Erfüllung seiner Leistungspflichten erforderlich ist und unsere Weisungen in Bezug auf diese Daten befolgen.</p>
 
-              <p>Wir setzen folgende(n) Hoster ein:</p>
+              <p>Wir setzen folgenden Hoster ein:</p>
               <address>
-                Vercel Inc.<br />
-                340 S Lemon Ave #4133<br />
-                Walnut, CA 91789
+                GitHub, Inc.<br />
+                88 Colin P. Kelly Jr. St.<br />
+                San Francisco, CA 94107<br />
+                USA
               </address>
+
+              <p>Die Website wird über den Dienst GitHub Pages bereitgestellt. Beim Aufruf der Website protokolliert GitHub die IP-Adresse der Besucher und speichert sie aus Sicherheitsgründen, unabhängig davon, ob die Besucher bei GitHub angemeldet sind. Details entnehmen Sie der Datenschutzerklärung von GitHub: <a className="link break-words" href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement">https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement</a>.</p>
+
+              <p>Das Unternehmen verfügt über eine Zertifizierung nach dem „EU-US Data Privacy Framework“ (DPF). Der DPF ist ein Übereinkommen zwischen der Europäischen Union und den USA, das die Einhaltung europäischer Datenschutzstandards bei Datenverarbeitungen in den USA gewährleisten soll. Jedes nach dem DPF zertifizierte Unternehmen verpflichtet sich, diese Datenschutzstandards einzuhalten.</p>
             </section>
 
             <section>
