@@ -135,10 +135,66 @@ for (let changed = true; changed; ) {
 }
 
 // Over and under alternate like a chequerboard
-function warpOver(w: Band, v: Band) {
-  const n = Math.round((w.offset + v.offset) / PITCH)
+function chequer(warpOffset: number, weftOffset: number) {
+  const n = Math.round((warpOffset + weftOffset) / PITCH)
   return ((n % 2) + 2) % 2 === 0
 }
+
+// Does the weft band cross the whole width of the warp band, and vice versa?
+function crossesFully(w: Band, v: Band) {
+  const half = BAND / 2
+  return (
+    v.offset - half >= w.from &&
+    v.offset + half <= w.to &&
+    w.offset - half >= v.from &&
+    w.offset + half <= v.to
+  )
+}
+
+/*
+ * If a band lies underneath at its outermost crossing, the bit beyond would
+ * show as a detached piece. Instead the band runs under that crossing band
+ * and ends there, hidden, like a tucked-in thread.
+ */
+function tuckEnds() {
+  const tucks: [Band, 'from' | 'to', number][] = []
+  for (const [own, others, isWarp] of [
+    [warp, weft, true],
+    [weft, warp, false],
+  ] as const) {
+    for (const band of own) {
+      const along = others
+        .filter((other) => (isWarp ? crossesFully(band, other) : crossesFully(other, band)))
+        .map((other) => other.offset)
+      if (along.length === 0) continue
+      const onTop = (at: number) => (isWarp ? chequer(band.offset, at) : !chequer(at, band.offset))
+      const first = Math.min(...along)
+      const last = Math.max(...along)
+      if (!onTop(last)) tucks.push([band, 'to', last])
+      if (!onTop(first)) tucks.push([band, 'from', first])
+    }
+  }
+  for (const [band, end, at] of tucks) band[end] = at
+}
+
+tuckEnds()
+
+const same = (a: number, b: number) => Math.abs(a - b) < 1e-6
+const reaches = (band: Band, at: number) => at >= band.from - 1e-6 && at <= band.to + 1e-6
+
+// Every place where two bands meet, and which one lies on top there
+const crossings = warp.flatMap((w, i) =>
+  weft
+    .map((v, j) => ({ w, v, i, j }))
+    .filter(({ w, v }) => reaches(w, v.offset) && reaches(v, w.offset))
+    .map((crossing) => {
+      const { w, v } = crossing
+      const warpTucked = same(w.from, v.offset) || same(w.to, v.offset)
+      const weftTucked = same(v.from, w.offset) || same(v.to, w.offset)
+      const warpOver = warpTucked ? false : weftTucked || chequer(w.offset, v.offset)
+      return { ...crossing, warpOver }
+    }),
+)
 
 function outline(x: number, y: number, width: number, height: number) {
   return `M${fmt(x)} ${fmt(y)}h${fmt(width)}v${fmt(height)}h${fmt(-width)}Z`
@@ -150,17 +206,6 @@ function delay(ms: number) {
 
 export function Weave({ className }: { className?: string }) {
   const half = BAND / 2
-  const crossings = warp.flatMap((w, i) =>
-    weft
-      .map((v, j) => ({ w, v, i, j }))
-      .filter(
-        ({ w, v }) =>
-          v.offset - half >= w.from &&
-          v.offset + half <= w.to &&
-          w.offset - half >= v.from &&
-          w.offset + half <= v.to,
-      ),
-  )
 
   return (
     <svg
@@ -219,7 +264,7 @@ export function Weave({ className }: { className?: string }) {
 
         {/* Interlace: every other crossing lifts the warp back on top */}
         {crossings
-          .filter(({ w, v }) => warpOver(w, v))
+          .filter(({ warpOver }) => warpOver)
           .map(({ w, v, i, j }) => {
             const x = v.offset - half - GAP
             const length = BAND + 2 * GAP
