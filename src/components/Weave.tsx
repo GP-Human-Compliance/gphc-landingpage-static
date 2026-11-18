@@ -16,10 +16,10 @@ const FRAME_CORNER = 18 // corner radius of the frame
 const FRAME_STROKE = 2.2
 const LINE_STROKE = 1.1
 const MARGIN = 20 // clear space between frame and weave
-const RINGS = 3 // crossings from the centre to the edge of the weave
-const HALF = 4.8 // half a band's width, measured along the crossing band
-const GAP = 1.6 // breathing room where one band passes under another
-const TUCK = 3 // how far a band reaches past its last crossing at top and bottom
+const RINGS = 2 // crossings from the centre to the edge of the weave
+const HALF = 6.5 // half a band's width, measured along the crossing band
+const GAP = 1.8 // breathing room where one band passes under another
+const TUCK = 3.5 // how far a band reaches past its last crossing at top and bottom
 
 const SIN60 = Math.sqrt(3) / 2
 
