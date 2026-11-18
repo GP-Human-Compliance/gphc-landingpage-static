@@ -5,7 +5,6 @@ import { Container } from '@/components/Container'
 const links = [
   ['Impressum', '/legal'],
   ['Datenschutz', '/privacy'],
-  ['Kontakt', 'mailto:info@gp-hc.de'],
 ]
 
 export function Footer() {
@@ -14,7 +13,7 @@ export function Footer() {
       <Container>
         <div className="flex flex-col-reverse gap-4 border-t border-rule py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} GP Human Compliance GmbH</p>
-          <nav aria-label="Rechtliches und Kontakt">
+          <nav aria-label="Rechtliches">
             <ul className="flex gap-6">
               {links.map(([label, href]) => (
                 <li key={href}>

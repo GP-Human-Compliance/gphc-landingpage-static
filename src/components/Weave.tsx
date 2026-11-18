@@ -1,93 +1,125 @@
 /*
  * The woven hexagon from the GP-HC logo, drawn as line art.
  *
- * Two sets of bands cross and alternate over/under like a weave: individual
- * threads that only hold together as a fabric. The bands run at ±60°, so the
- * weave lattice lines up with the hexagon: every band is a complete bar with
- * closed ends, and the band spacing is stretched to fit, so that the clear
- * space between frame and weave is the same on all six sides.
- *
- * Rendered as static SVG at build time; the draw-in animation is pure CSS
- * (see .weave-thread / .weave-fade) and is skipped for reduced motion.
+ * Two sets of bands cross at right angles (rotated by 45°) and alternate
+ * over/under like a weave: individual threads that only hold together as a
+ * fabric. Rendered as static SVG at build time; the draw-in animation is pure
+ * CSS (see .weave-thread / .weave-fade) and is skipped for reduced motion.
  */
 
-const FRAME_APOTHEM = 81 // centre to the middle of a frame edge
-const FRAME_CORNER = 18 // corner radius of the frame
-const FRAME_STROKE = 2.2
-const LINE_STROKE = 1.1
-const MARGIN = 20 // clear space between frame and weave
-const RINGS = 2 // crossings from the centre to the edge of the weave
-const HALF = 6.5 // half a band's width, measured along the crossing band
+const FRAME_RADIUS = 94 // circumradius of the outer hexagon frame
+const FRAME_CORNER = 9 // corner rounding of the frame
+const FIELD_RADIUS = 76 // bands are kept inside this hexagon
+const BAND = 10 // band width
+const PITCH = 20 // distance between band centres
 const GAP = 1.8 // breathing room where one band passes under another
-const TUCK = 3.5 // how far a band reaches past its last crossing at top and bottom
+const MIN_LENGTH = BAND * 1.6
 
-const SIN60 = Math.sqrt(3) / 2
-
-/*
- * Lattice coordinates: s runs along the first set of bands (warp, 60°), t
- * along the second (weft, 120°). In these coordinates the hexagon is
- * |s| ≤ EXTENT, |t| ≤ EXTENT, |s + t| ≤ EXTENT.
- */
-const FIELD_APOTHEM = FRAME_APOTHEM - FRAME_STROKE / 2 - MARGIN - LINE_STROKE / 2
-const EXTENT = FIELD_APOTHEM / SIN60
-const OVERHANG = HALF + TUCK // past the last crossing on the slanted sides
-const PITCH = (EXTENT - HALF - OVERHANG) / RINGS
+type Point = [number, number]
+type Band = { offset: number; from: number; to: number }
 
 const fmt = (n: number) => Number(n.toFixed(2))
 
-function point(s: number, t: number) {
-  return `${fmt((s - t) / 2)} ${fmt(SIN60 * (s + t))}`
-}
-
-function polygon(...corners: [number, number][]) {
-  return 'M' + corners.map(([s, t]) => point(s, t)).join('L') + 'Z'
-}
-
-// Where a band centred at offset c starts and ends along its own direction
-function reach(c: number): [number, number] {
-  return [Math.max(-EXTENT, -EXTENT - c + HALF), Math.min(EXTENT, EXTENT - c - HALF)]
-}
-
-/*
- * Frame: hexagon with flat top and bottom (points to the left and right, like
- * the logo) and circular corners.
- */
-function framePath(apothem: number, corner: number) {
-  const radius = (apothem * 2) / Math.sqrt(3)
-  const vertices = Array.from({ length: 6 }, (_, i) => {
+function hexagon(radius: number): Point[] {
+  // Flat top and bottom, points to the left and right, like the logo
+  return Array.from({ length: 6 }, (_, i) => {
     const angle = (Math.PI / 3) * i
-    return [radius * Math.cos(angle), radius * Math.sin(angle)] as const
+    return [radius * Math.cos(angle), radius * Math.sin(angle)]
   })
-  const tangent = corner * Math.tan(Math.PI / 6)
+}
+
+function roundedPolygonPath(points: Point[], corner: number) {
+  const n = points.length
   const parts: string[] = []
-  vertices.forEach((vertex, i) => {
-    const toward = (target: readonly [number, number]) => {
+  points.forEach((vertex, i) => {
+    const prev = points[(i - 1 + n) % n]
+    const next = points[(i + 1) % n]
+    const toward = (target: Point): Point => {
       const dx = target[0] - vertex[0]
       const dy = target[1] - vertex[1]
       const length = Math.hypot(dx, dy)
-      return [vertex[0] + (dx / length) * tangent, vertex[1] + (dy / length) * tangent]
+      return [vertex[0] + (dx / length) * corner, vertex[1] + (dy / length) * corner]
     }
-    const [ax, ay] = toward(vertices[(i + 5) % 6])
-    const [bx, by] = toward(vertices[(i + 1) % 6])
+    const a = toward(prev)
+    const b = toward(next)
     parts.push(
-      `${i === 0 ? 'M' : 'L'}${fmt(ax)} ${fmt(ay)}`,
-      `A${fmt(corner)} ${fmt(corner)} 0 0 1 ${fmt(bx)} ${fmt(by)}`,
+      `${i === 0 ? 'M' : 'L'}${fmt(a[0])} ${fmt(a[1])}`,
+      `Q${fmt(vertex[0])} ${fmt(vertex[1])} ${fmt(b[0])} ${fmt(b[1])}`,
     )
   })
   return parts.join('') + 'Z'
 }
 
-const indices = Array.from({ length: RINGS * 2 + 1 }, (_, i) => i - RINGS)
+/*
+ * Bands are laid out in a frame rotated by 45°, where the first set runs
+ * horizontally and the second vertically. The field hexagon is expressed in
+ * that frame as six half-planes; each band is clipped to them so that it ends
+ * with a closed, square end inside the frame instead of being cut off.
+ */
+const ROTATION = Math.PI / 4
+const APOTHEM = (FIELD_RADIUS * Math.sqrt(3)) / 2
+const halfPlanes = Array.from({ length: 6 }, (_, i) => {
+  const angle = Math.PI / 6 + (Math.PI / 3) * i - ROTATION
+  return { nx: Math.cos(angle), ny: Math.sin(angle) }
+})
+
+function span(horizontal: boolean, offset: number): Band | null {
+  let from = -Infinity
+  let to = Infinity
+  for (const { nx, ny } of halfPlanes) {
+    // Point on the band's centre line: (t, offset) or (offset, t)
+    const along = horizontal ? nx : ny
+    const fixed = (horizontal ? ny : nx) * offset
+    // The band edge closest to this side must stay inside as well
+    const limit = APOTHEM - Math.abs((horizontal ? ny : nx) * (BAND / 2)) - fixed
+    if (Math.abs(along) < 1e-9) {
+      if (limit < 0) return null
+      continue
+    }
+    const t = limit / along
+    if (along > 0) to = Math.min(to, t)
+    else from = Math.max(from, t)
+  }
+  // Leave a little room between the band ends and the field edge
+  from += BAND / 2
+  to -= BAND / 2
+  return to - from >= MIN_LENGTH ? { offset, from, to } : null
+}
+
+function bands(horizontal: boolean) {
+  const count = Math.ceil(FIELD_RADIUS / PITCH)
+  const result: Band[] = []
+  for (let k = -count; k <= count; k++) {
+    const band = span(horizontal, k * PITCH)
+    if (band) result.push(band)
+  }
+  return result
+}
+
+const warp = bands(true) // first set: horizontal in the rotated frame
+const weft = bands(false) // second set: vertical in the rotated frame
+
+function outline(x: number, y: number, width: number, height: number) {
+  return `M${fmt(x)} ${fmt(y)}h${fmt(width)}v${fmt(height)}h${fmt(-width)}Z`
+}
 
 function delay(ms: number) {
   return { '--delay': `${Math.round(ms)}ms` } as React.CSSProperties
 }
 
 export function Weave({ className }: { className?: string }) {
-  const h = HALF
-  const crossings = indices
-    .flatMap((i) => indices.map((j) => ({ i, j })))
-    .filter(({ i, j }) => Math.abs(i + j) <= RINGS && (i + j) % 2 === 0)
+  const half = BAND / 2
+  const crossings = warp.flatMap((w, i) =>
+    weft
+      .map((v, j) => ({ w, v, i, j }))
+      .filter(
+        ({ w, v }) =>
+          v.offset - half >= w.from &&
+          v.offset + half <= w.to &&
+          w.offset - half >= v.from &&
+          w.offset + half <= v.to,
+      ),
+  )
 
   return (
     <svg
@@ -98,69 +130,77 @@ export function Weave({ className }: { className?: string }) {
       strokeLinejoin="round"
     >
       <path
-        d={framePath(FRAME_APOTHEM, FRAME_CORNER)}
+        d={roundedPolygonPath(hexagon(FRAME_RADIUS), FRAME_CORNER)}
         pathLength={1}
         className="weave-thread stroke-teal"
-        strokeWidth={FRAME_STROKE}
+        strokeWidth={2.2}
         style={delay(0)}
       />
 
-      <g strokeWidth={LINE_STROKE} className="stroke-teal">
+      <g transform="rotate(45)" strokeWidth={1.1} className="stroke-teal">
         {/* Warp: drawn first, lies underneath by default */}
-        {indices.map((j) => {
-          const t = j * PITCH
-          const [from, to] = reach(t)
-          return (
+        {warp.map((band, i) => (
+          <g key={`warp-${i}`}>
+            <rect
+              x={fmt(band.from)}
+              y={fmt(band.offset - half - GAP)}
+              width={fmt(band.to - band.from)}
+              height={fmt(BAND + 2 * GAP)}
+              className="fill-paper stroke-none"
+            />
             <path
-              key={`warp${j}`}
-              d={polygon([from, t - h], [to, t - h], [to, t + h], [from, t + h])}
+              d={outline(band.from, band.offset - half, band.to - band.from, BAND)}
               pathLength={1}
               className="weave-thread"
-              style={delay(150 + (j + RINGS) * 70)}
+              style={delay(150 + i * 60)}
             />
-          )
-        })}
+          </g>
+        ))}
 
         {/* Weft: crosses over every warp band */}
-        {indices.map((i) => {
-          const s = i * PITCH
-          const [from, to] = reach(s)
-          return (
-            <g key={`weft${i}`} className="weave-fade" style={delay(650 + (i + RINGS) * 70)}>
-              <path
-                d={polygon([s - h - GAP, from], [s + h + GAP, from], [s + h + GAP, to], [s - h - GAP, to])}
-                className="fill-paper stroke-none"
-              />
-              <path
-                d={polygon([s - h, from], [s - h, to], [s + h, to], [s + h, from])}
-                pathLength={1}
-                className="weave-thread"
-                style={delay(650 + (i + RINGS) * 70)}
-              />
-            </g>
-          )
-        })}
+        {weft.map((band, j) => (
+          <g key={`weft-${j}`} className="weave-fade" style={delay(600 + j * 60)}>
+            <rect
+              x={fmt(band.offset - half - GAP)}
+              y={fmt(band.from)}
+              width={fmt(BAND + 2 * GAP)}
+              height={fmt(band.to - band.from)}
+              className="fill-paper stroke-none"
+            />
+            <path
+              d={outline(band.offset - half, band.from, BAND, band.to - band.from)}
+              pathLength={1}
+              className="weave-thread"
+              style={delay(600 + j * 60)}
+            />
+          </g>
+        ))}
 
         {/* Interlace: every other crossing lifts the warp back on top */}
-        {crossings.map(({ i, j }) => {
-          const s = i * PITCH
-          const t = j * PITCH
-          const s0 = s - h - GAP
-          const s1 = s + h + GAP
-          return (
-            <g
-              key={`over${i}_${j}`}
-              className="weave-fade"
-              style={delay(1750 + (i + j + 2 * RINGS) * 45)}
-            >
-              <path
-                d={polygon([s0, t - h - GAP], [s1, t - h - GAP], [s1, t + h + GAP], [s0, t + h + GAP])}
-                className="fill-paper stroke-none"
-              />
-              <path d={`M${point(s0, t - h)}L${point(s1, t - h)}M${point(s0, t + h)}L${point(s1, t + h)}`} />
-            </g>
-          )
-        })}
+        {crossings
+          .filter(({ i, j }) => (i + j) % 2 === 0)
+          .map(({ w, v, i, j }) => {
+            const x = v.offset - half - GAP
+            const length = BAND + 2 * GAP
+            return (
+              <g
+                key={`over-${i}-${j}`}
+                className="weave-fade"
+                style={delay(1700 + (i + j) * 35)}
+              >
+                <rect
+                  x={fmt(x)}
+                  y={fmt(w.offset - half - GAP)}
+                  width={fmt(length)}
+                  height={fmt(BAND + 2 * GAP)}
+                  className="fill-paper stroke-none"
+                />
+                <path
+                  d={`M${fmt(x)} ${fmt(w.offset - half)}h${fmt(length)}M${fmt(x)} ${fmt(w.offset + half)}h${fmt(length)}`}
+                />
+              </g>
+            )
+          })}
       </g>
     </svg>
   )
