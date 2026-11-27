@@ -67,6 +67,10 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest'
 }
 
+// GitHub Pages cannot enforce HTTPS for this domain yet (its certificate request
+// is stuck), so send visitors who arrive over http:// to the https:// address.
+const httpsRedirect = `if (location.protocol === 'http:' && location.hostname === 'www.gp-hc.de') location.replace('https://' + location.host + location.pathname + location.search + location.hash)`
+
 export default function RootLayout({
   children,
 }: {
@@ -74,6 +78,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" className={clsx('bg-paper antialiased', openSans.variable)}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: httpsRedirect }} />
+      </head>
       <body className="font-sans">{children}</body>
     </html>
   )
